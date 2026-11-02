@@ -1,57 +1,77 @@
-# duru-backend
+# Duru-Backend
 
-둘이 함께 쓰는 지출 기록·일정 공유·목표 체크 웹앱 duru의 백엔드입니다.
-현재는 Spring Boot 기본 프로젝트와 서버 연결 확인 API를 준비한 단계입니다.
-DB·로그인·지출 저장 등 서비스 기능은 아직 구현하지 않았습니다.
+**둘이 함께, 하루를 두루.**
 
-## 기술
+Duru는 둘의 지출, 일정, 일간·주간·월간 목표를 함께 관리하는 웹앱입니다.
+개인 개발·운영 프로젝트로, 실제 사용을 통해 개선한 과정과 기술적 판단을 기록합니다.
 
-Java 21 · Spring Boot 4.1.2 · Gradle Wrapper 9.8.2
+## 프로젝트 문서
 
-## 실행
+| 문서 | 내용 |
+| --- | --- |
+| [개발 가이드](CONTRIBUTING.md) | 이슈·브랜치·커밋·PR·릴리스 |
+| [코드 기준](CONVENTIONS.md) | 구조·데이터·품질·보안 |
+| [AI 지침](AGENTS.md) | 작업 절차·검증·변경 범위 |
+| [저장소 운영 설정](docs/REPOSITORY_SETUP.md) | Ruleset·CI 적용과 초기 업로드 |
 
-JDK 21을 설치하고 이 저장소의 루트에서 실행합니다. Gradle은 별도 설치하지 않습니다.
+## 기술과 개발 환경
+
+| 구분 | 구성 |
+| --- | --- |
+| 애플리케이션 | Java · Spring Boot |
+| 실행 환경 | JDK 21, Gradle Wrapper |
+| 코드 검증 | JUnit·Spring Boot 테스트, 실행 JAR 빌드 |
+
+정확한 라이브러리 버전은 `build.gradle`·Gradle Wrapper를 기준으로 합니다.
+
+## 로컬 실행
+
+저장소 루트에서 실행합니다.
 
 ```bash
 ./gradlew bootRun
 ```
 
-Windows에서는 `gradlew.bat bootRun`을 사용합니다.
-macOS에서는 `./scripts/dev.sh`로 실행해도 됩니다.
-서버는 `http://127.0.0.1:8080`에서 실행됩니다. 종료는 Control + C입니다.
+접속 주소: http://127.0.0.1:8080. 종료는 실행한 터미널에서 Control + C입니다.
+macOS에서는 `./scripts/dev.sh`로도 실행할 수 있습니다.
 
-```bash
-curl http://127.0.0.1:8080/api/health
-```
-
-정상 응답은 `status`가 `UP`인 JSON입니다.
-현재 서버는 로컬 접속만 허용합니다. 운영 배포 시 바인딩·네트워크·인증 설정을 따로 구성해야 합니다.
-
-## IntelliJ에서 열기
-
-Open으로 이 저장소 폴더를 선택하고 Gradle 프로젝트로 불러옵니다.
-Project SDK와 Gradle JVM은 Java 21을 선택합니다.
-현재 맥의 JDK 경로는 `/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home`입니다.
-`src/main/java/com/duru/DuruApplication.java`의 main으로도 실행할 수 있습니다.
-이미 서버가 실행 중이면 종료한 뒤 실행해 포트 충돌을 피합니다.
+`GET /api/health`의 `status`가 `UP`이면 정상 실행 상태입니다.
+Windows는 `gradlew.bat`을 사용합니다. Gradle은 별도로 설치하지 않습니다.
+IntelliJ에서 저장소를 Gradle 프로젝트로 열고 Project SDK·Gradle JVM에 Java 21을 지정합니다.
 
 ## 검증
 
 ```bash
-./gradlew test
-./gradlew bootJar
+./gradlew test bootJar
 ```
 
-현재 테스트는 애플리케이션 시작과 HTTP 상태 확인 API를 검증합니다.
+CI 정의는 [`.github/workflows/ci.yml`](.github/workflows/ci.yml)에 있으며, dev·main push와 PR에서 `Backend CI`를 실행합니다.
+문서 변경도 CI 실행 대상입니다. 미실행·미확인 검사는 통과로 기록하지 않습니다.
 
-## 개발 방법
+### 도구 적용 범위
 
-작업 방식과 버전 관리는 [CONTRIBUTING.md](CONTRIBUTING.md)를 참고하세요.
-인증 정보·DB 비밀번호·실제 사용자 데이터는 커밋하지 않습니다.
+Java 서식 기준은 CONVENTIONS에 정의합니다. Checkstyle·자동 formatter는 아직 빌드에 연결하지 않았습니다.
+CI·필수 검사 설정의 실제 적용 상태는 [저장소 운영 설정](docs/REPOSITORY_SETUP.md)에 기록합니다.
 
-## 관련 프로젝트
+## 개발 흐름
 
-프론트엔드 저장소 이름은 `duru-frontend`입니다. GitHub Organization 생성 후 실제 링크를 추가합니다.
-개인 개발·운영 프로젝트로 진행합니다. 배포는 기능 구현 후 시작할 계획입니다.
-Oracle 무료 VM을 사용할 경우 Oracle DB를 써야 하는 것은 아닙니다.
-DB 종류와 ARM64 배포 구성은 배포 준비 단계에서 확정합니다.
+```text
+작업 브랜치 ── PR / Squash ──▶ dev ── 릴리스 PR / Merge commit ──▶ main
+                                ◀──── 동기화 PR / Merge commit ────┘
+```
+
+기본 작업 기준은 dev이며 main은 릴리스 기준입니다. 서버 수와 독립적으로 운영합니다.
+상세 병합·완료 기준은 CONTRIBUTING을 따릅니다.
+
+## 구현 범위
+
+애플리케이션 실행과 `GET /api/health`를 제공하는 개발 기반 단계입니다.
+지출·캘린더·목표·인증·DB와 실제 배포는 개발 범위에 포함되며 아직 구현하지 않았습니다.
+세부 진행 상황은 Issue·Milestone에서 관리합니다.
+
+## 관련 저장소
+
+- [Duru-Frontend](https://github.com/Duru-Official/Duru-Frontend)
+- [Duru Organization](https://github.com/Duru-Official)
+
+문서·예시·화면에는 가짜 데이터를 사용하며, 실제 지출·일정·인증정보는 공개 저장소에 올리지 않습니다.
